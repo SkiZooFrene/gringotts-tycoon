@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Gringotts Idle Mine Tycoon</title>
+  <style>
+    :root {
+      --bg-dark: #0f0c1b;
+      --bg-panel: #1b162b;
+      --bg-card: #27203d;
+      --gold: #f39c12;
+      --gold-light: #f1c40f;
+      --gold-glow: rgba(241, 196, 15, 0.4);
+      --purple-accent: #8e44ad;
+      --text-light: #f5f5f7;
+      --text-muted: #a0a0b0;
+      --border-color: #3d335a;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: var(--font-family);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: -webkit-fill-available;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(180deg, #18122B 0%, #0F0C1B 100%);
+      padding: 12px 16px;
+      padding-top: calc(12px + env(safe-area-inset-top));
+      border-bottom: 2px solid var(--gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+
+    .currency-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .coin-icon {
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle, var(--gold-light), var(--gold));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    .currency-amount {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold-light);
+    }
+
+    .buy-multiplier {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    /* MAIN CONTENT AREA */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* CARD STYLING */
+    .tycoon-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-weight: bold;
+      font-size: 1rem;
+      color: var(--text-light);
+    }
+
+    .card-level {
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.1);
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: var(--gold);
+    }
+
+    /* PROGRESS BAR */
+    .bar-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--purple-accent), var(--gold));
+      transition: width 0.05s linear;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* BUTTONS */
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #1c5980;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #1c5980;
+    }
+
+    .btn-upgrade {
+      background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+      box-shadow: 0 3px 0 #1e8449;
+    }
+
+    .btn-upgrade:active {
+      box-shadow: 0 1px 0 #1e8449;
+    }
+
+    .btn-subtext {
+      font-size: 0.7rem;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
+
+    .manager-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #2ecc71;
+      margin-top: 4px;
+    }
+
+    /* BOTTOM NAV */
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #120e20;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--gold-light);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--bg-panel);
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+    }
+
+    .modal-title {
+      color: var(--gold-light);
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .modal-body {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 20px;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    .modal-btn {
+      background: var(--gold);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="currency-container">
+      <div class="coin-icon">G</div>
+      <div id="gold-display" class="currency-amount">25</div>
+    </div>
+    <button id="buy-mult-btn" class="buy-multiplier" onclick="toggleBuyMultiplier()">x1</button>
+  </header>
+
+  <!-- MAIN SCROLLABLE GAME AREA -->
+  <main id="game-view">
+    
+    <!-- SURFACE / BANK SECTION -->
+    <div class="section-title">🔮 Comptoir de Change Gringotts (Vente)</div>
+    <div class="tycoon-card">
+      <div class="card-header">
+        <span class="card-title">Vente des Minerais</span>
+        <span id="bank-level" class="card-level">Niv. 1</span>
+      </div>
+      <div class="info-row">
+        <span>Réserves : <b id="surface-stock">0</b> u.</span>
+        <span>Vitesse : <b id="bank-speed">2.0s</b></span>
+      </div>
+      <div class="bar-container">
+        <div id="bank-bar" class="bar-fill"></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerBank()">Vendre</button>
+        <button class="btn btn-upgrade" onclick="upgradeBank()">
+          Améliorer
+          <span id="bank-cost" class="btn-subtext">20 G</span>
+        </button>
+      </div>
+      <div id="bank-manager-container"></div>
+    </div>
+
+    <!-- TRANSPORT / ELEVATOR SECTION -->
+    <div class="section-title">🛒 Chariots Souterrains (Transport)</div>
+    <div class="tycoon-card">
+      <div class="card-header">
+        <span class="card-title">Chariots Enchantés</span>
+        <span id="cart-level" class="card-level">Niv. 1</span>
+      </div>
+      <div class="info-row">
+        <span>Capacité : <b id="cart-cap">15</b> u.</span>
+        <span>Vitesse : <b id="cart-speed">3.0s</b></span>
+      </div>
+      <div class="bar-container">
+        <div id="cart-bar" class="bar-fill"></div>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="triggerCart()">Transporter</button>
+        <button class="btn btn-upgrade" onclick="upgradeCart()">
+          Améliorer
+          <span id="cart-cost" class="btn-subtext">15 G</span>
+        </button>
+      </div>
+      <div id="cart-manager-container"></div>
+    </div>
+
+    <!-- SHAFTS / MINES SECTION -->
+    <div class="section-title">⛏️ Puits d'Extraction Magiques (Mines)</div>
+    <div id="shafts-container">
+      <!-- Generated dynamically -->
+    </div>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav>
+    <div class="nav-item active">
+      <span>⛏️</span>
+      <span>Mine</span>
+    </div>
+    <div class="nav-item" onclick="openManagerModal()">
+      <span>🧙‍♂️</span>
+      <span>Gestionnaires</span>
+    </div>
+  </nav>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 id="modal-title" class="modal-title">Gestionnaires</h2>
+      <div id="modal-body" class="modal-body"></div>
+      <button class="modal-btn" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+
+  <script>
+    /* --- GAME STATE & CONFIGURATION --- */
+    let buyMultipliers = [1, 10, 100];
+    let buyMultIndex = 0;
+
+    let gameState = {
+      gold: 25,
+      surfaceStock: 0,
+      bank: { level: 1, progress: 0, speed: 2.0, manager: false },
+      cart: { level: 1, progress: 0, speed: 3.0, manager: false },
+      shafts: [
+        { id: 0, name: "Poussière Lumineuse", level: 1, stock: 0, progress: 0, speed: 1.5, manager: false, unlocked: true },
+        { id: 1, name: "Argent de Gobelin", level: 0, stock: 0, progress: 0, speed: 2.0, manager: false, unlocked: false },
+        { id: 2, name: "Cristaux d'Ombre", level: 0, stock: 0, progress: 0, speed: 2.5, manager: false, unlocked: false }
+      ],
+      lastTime: Date.now()
+    };
+
+    /* --- FORMULAS --- */
+    function getShaftExtractAmount(level) {
+      if (level === 0) return 0;
+      return Math.floor(1 * Math.pow(1.2, level - 1));
+    }
+
+    function getShaftUpgradeCost(level) {
+      return Math.floor(10 * Math.pow(1.25, level));
+    }
+
+    function getCartCapacity(level) {
+      return Math.floor(15 * Math.pow(1.22, level - 1));
+    }
+
+    function getCartUpgradeCost(level) {
+      return Math.floor(15 * Math.pow(1.25, level));
+    }
+
+    function getBankRate(level) {
+      return Math.floor(5 * Math.pow(1.2, level - 1));
+    }
+
+    function getBankUpgradeCost(level) {
+      return Math.floor(20 * Math.pow(1.25, level));
+    }
+
+    /* --- MANUAL TRIGGERS (PROGRESSION LOOPS) --- */
+    function triggerShaft(id) {
+      let shaft = gameState.shafts[id];
+      if (shaft.level === 0 || shaft.progress > 0) return;
+      shaft.progress = 0.01;
+    }
+
+    function triggerCart() {
+      if (gameState.cart.progress > 0) return;
+      gameState.cart.progress = 0.01;
+    }
+
+    function triggerBank() {
+      if (gameState.surfaceStock <= 0 || gameState.bank.progress > 0) return;
+      gameState.bank.progress = 0.01;
+    }
+
+    /* --- UPGRADES --- */
+    function upgradeShaft(id) {
+      let shaft = gameState.shafts[id];
+      let cost = getShaftUpgradeCost(shaft.level);
+      if (gameState.gold >= cost) {
+        gameState.gold -= cost;
+        shaft.level++;
+        if (!shaft.unlocked) shaft.unlocked = true;
+      }
+    }
+
+    function upgradeCart() {
+      let cost = getCartUpgradeCost(gameState.cart.level);
+      if (gameState.gold >= cost) {
+        gameState.gold -= cost;
+        gameState.cart.level++;
+      }
+    }
+
+    function upgradeBank() {
+      let cost = getBankUpgradeCost(gameState.bank.level);
+      if (gameState.gold >= cost) {
+        gameState.gold -= cost;
+        gameState.bank.level++;
+      }
+    }
+
+    function toggleBuyMultiplier() {
+      buyMultIndex = (buyMultIndex + 1) % buyMultipliers.length;
+      document.getElementById('buy-mult-btn').innerText = `x${buyMultipliers[buyMultIndex]}`;
+    }
+
+    /* --- MAIN GAME LOOP (TICK) --- */
+    let lastFrameTime = Date.now();
+
+    function gameLoop() {
+      let now = Date.now();
+      let dt = (now - lastFrameTime) / 1000;
+      lastFrameTime = now;
+
+      // 1. Shafts Progress
+      gameState.shafts.forEach(shaft => {
+        if (!shaft.unlocked || shaft.level === 0) return;
+
+        if (shaft.manager && shaft.progress === 0) {
+          shaft.progress = 0.01;
+        }
+
+        if (shaft.progress > 0) {
+          shaft.progress += dt / shaft.speed;
+          if (shaft.progress >= 1) {
+            shaft.progress = shaft.manager ? 0.01 : 0;
+            shaft.stock += getShaftExtractAmount(shaft.level);
+          }
+        }
+      });
+
+      // 2. Cart Progress
+      if (gameState.cart.manager && gameState.cart.progress === 0) {
+        gameState.cart.progress = 0.01;
+      }
+
+      if (gameState.cart.progress > 0) {
+        gameState.cart.progress += dt / gameState.cart.speed;
+        if (gameState.cart.progress >= 1) {
+          gameState.cart.progress = gameState.cart.manager ? 0.01 : 0;
+          
+          let cartCap = getCartCapacity(gameState.cart.level);
+          let totalCollected = 0;
+          for (let shaft of gameState.shafts) {
+            if (!shaft.unlocked) continue;
+            let spaceLeft = cartCap - totalCollected;
+            if (spaceLeft <= 0) break;
+            let toTake = Math.min(shaft.stock, spaceLeft);
+            shaft.stock -= toTake;
+            totalCollected += toTake;
+          }
+          gameState.surfaceStock += totalCollected;
+        }
+      }
+
+      // 3. Bank Progress
+      if (gameState.bank.manager && gameState.bank.progress === 0 && gameState.surfaceStock > 0) {
+        gameState.bank.progress = 0.01;
+      }
+
+      if (gameState.bank.progress > 0) {
+        gameState.bank.progress += dt / gameState.bank.speed;
+        if (gameState.bank.progress >= 1) {
+          gameState.bank.progress = 0;
+          let rate = getBankRate(gameState.bank.level);
+          let toSell = Math.min(gameState.surfaceStock, rate);
+          if (toSell > 0) {
+            gameState.surfaceStock -= toSell;
+            gameState.gold += toSell;
+          }
+          if (gameState.bank.manager && gameState.surfaceStock > 0) {
+            gameState.bank.progress = 0.01;
+          }
+        }
+      }
+
+      updateUI();
+      requestAnimationFrame(gameLoop);
+    }
+
+    /* --- UI UPDATE --- */
+    function updateUI() {
+      document.getElementById('gold-display').innerText = Math.floor(gameState.gold).toLocaleString();
+      document.getElementById('surface-stock').innerText = Math.floor(gameState.surfaceStock).toLocaleString();
+      
+      // Bank UI
+      document.getElementById('bank-level').innerText = `Niv. ${gameState.bank.level}`;
+      document.getElementById('bank-speed').innerText = `${gameState.bank.speed.toFixed(1)}s`;
+      document.getElementById('bank-cost').innerText = `${getBankUpgradeCost(gameState.bank.level)} G`;
+      document.getElementById('bank-bar').style.width = `${Math.min(100, gameState.bank.progress * 100)}%`;
+      document.getElementById('bank-manager-container').innerHTML = gameState.bank.manager ? `<div class="manager-badge">✓ Caissier en poste</div>` : '';
+
+      // Cart UI
+      document.getElementById('cart-level').innerText = `Niv. ${gameState.cart.level}`;
+      document.getElementById('cart-cap').innerText = `${getCartCapacity(gameState.cart.level)}`;
+      document.getElementById('cart-speed').innerText = `${gameState.cart.speed.toFixed(1)}s`;
+      document.getElementById('cart-cost').innerText = `${getCartUpgradeCost(gameState.cart.level)} G`;
+      document.getElementById('cart-bar').style.width = `${Math.min(100, gameState.cart.progress * 100)}%`;
+      document.getElementById('cart-manager-container').innerHTML = gameState.cart.manager ? `<div class="manager-badge">✓ Conducteur en poste</div>` : '';
+
+      renderShafts();
+      saveGame();
+    }
+
+    function renderShafts() {
+      let container = document.getElementById('shafts-container');
+      container.innerHTML = '';
+
+      gameState.shafts.forEach((shaft) => {
+        let card = document.createElement('div');
+        card.className = 'tycoon-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">${shaft.name}</span>
+            <span class="card-level">Niv. ${shaft.level}</span>
+          </div>
+          <div class="info-row">
+            <span>Production : <b>${getShaftExtractAmount(shaft.level)}u / ${shaft.speed}s</b></span>
+            <span>Stock puits : <b>${Math.floor(shaft.stock)}</b></span>
+          </div>
+          <div class="bar-container">
+            <div class="bar-fill" style="width: ${Math.min(100, shaft.progress * 100)}%"></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn" onclick="triggerShaft(${shaft.id})">Extraire</button>
+            <button class="btn btn-upgrade" onclick="upgradeShaft(${shaft.id})">
+              Améliorer
+              <span class="btn-subtext">${getShaftUpgradeCost(shaft.level)} G</span>
+            </button>
+          </div>
+          ${shaft.manager ? '<div class="manager-badge">✓ Superviseur en poste</div>' : ''}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* --- MANAGERS MODAL --- */
+    function openManagerModal() {
+      let body = document.getElementById('modal-body');
+      body.innerHTML = `
+        <p style="margin-bottom:10px;">Embauchez des gestionnaires pour automatiser vos cycles de travail :</p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div>
+            <b>Caissier Gringotts (250 G)</b><br>
+            <button class="btn btn-upgrade" style="width:100%; margin-top:4px;" onclick="buyManager('bank', 250)" ${gameState.bank.manager || gameState.gold < 250 ? 'disabled style="opacity:0.5"' : ''}>${gameState.bank.manager ? 'Embauché' : 'Recruter'}</button>
+          </div>
+          <div>
+            <b>Conducteur de Chariot (150 G)</b><br>
+            <button class="btn btn-upgrade" style="width:100%; margin-top:4px;" onclick="buyManager('cart', 150)" ${gameState.cart.manager || gameState.gold < 150 ? 'disabled style="opacity:0.5"' : ''}>${gameState.cart.manager ? 'Embauché' : 'Recruter'}</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function buyManager(type, cost) {
+      if (gameState.gold >= cost) {
+        gameState.gold -= cost;
+        if (type === 'bank') gameState.bank.manager = true;
+        if (type === 'cart') gameState.cart.manager = true;
+        openManagerModal();
+        updateUI();
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    /* --- SAVE / OFFLINE --- */
+    function saveGame() {
+      gameState.lastTime = Date.now();
+      localStorage.setItem('gringotts_v1_original', JSON.stringify(gameState));
+    }
+
+    function loadGame() {
+      let saved = localStorage.getItem('gringotts_v1_original');
+      if (saved) {
+        let parsed = JSON.parse(saved);
+        gameState = { ...gameState, ...parsed };
+      }
+    }
+
+    loadGame();
+    requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
